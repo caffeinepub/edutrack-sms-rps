@@ -29,7 +29,8 @@ export function useSearchTeachers(schoolId: string, query = "") {
     queryKey: ["teachers", schoolId, query],
     queryFn: async () => {
       if (!actor || !schoolId) return [];
-      return actor.searchTeachersByName(BigInt(schoolId), query);
+      if (query) return actor.searchTeachersByName(BigInt(schoolId), query);
+      return actor.listTeachers(BigInt(schoolId));
     },
     enabled: !!actor && !isFetching && !!schoolId,
   });
@@ -41,7 +42,8 @@ export function useSearchStudents(schoolId: string, query = "") {
     queryKey: ["students", schoolId, query],
     queryFn: async () => {
       if (!actor || !schoolId) return [];
-      return actor.searchStudentsByName(BigInt(schoolId), query);
+      if (query) return actor.searchStudentsByName(BigInt(schoolId), query);
+      return actor.listStudents(BigInt(schoolId));
     },
     enabled: !!actor && !isFetching && !!schoolId,
   });
@@ -53,7 +55,8 @@ export function useSearchClasses(schoolId: string, query = "") {
     queryKey: ["classes", schoolId, query],
     queryFn: async () => {
       if (!actor || !schoolId) return [];
-      return actor.searchClassesByName(BigInt(schoolId), query);
+      if (query) return actor.searchClassesByName(BigInt(schoolId), query);
+      return actor.listClasses(BigInt(schoolId));
     },
     enabled: !!actor && !isFetching && !!schoolId,
   });
@@ -65,7 +68,8 @@ export function useSearchSubjects(schoolId: string, query = "") {
     queryKey: ["subjects", schoolId, query],
     queryFn: async () => {
       if (!actor || !schoolId) return [];
-      return actor.searchSubjectsByName(BigInt(schoolId), query);
+      if (query) return actor.searchSubjectsByName(BigInt(schoolId), query);
+      return actor.listSubjects(BigInt(schoolId));
     },
     enabled: !!actor && !isFetching && !!schoolId,
   });
@@ -89,8 +93,7 @@ export function useGetSessions(schoolId: string) {
     queryKey: ["sessions", schoolId],
     queryFn: async () => {
       if (!actor || !schoolId) return [];
-      // No list endpoint - return empty, manage locally
-      return [];
+      return actor.listSessions(BigInt(schoolId));
     },
     enabled: !!actor && !isFetching && !!schoolId,
   });
@@ -102,7 +105,7 @@ export function useGetTerms(schoolId: string) {
     queryKey: ["terms", schoolId],
     queryFn: async () => {
       if (!actor || !schoolId) return [];
-      return [];
+      return actor.listTerms(BigInt(schoolId));
     },
     enabled: !!actor && !isFetching && !!schoolId,
   });

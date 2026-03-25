@@ -211,6 +211,12 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     listAllSchools(): Promise<Array<School>>;
+    listClasses(schoolId: bigint): Promise<Array<Class>>;
+    listSessions(schoolId: bigint): Promise<Array<Session>>;
+    listStudents(schoolId: bigint): Promise<Array<Student>>;
+    listSubjects(schoolId: bigint): Promise<Array<Subject>>;
+    listTeachers(schoolId: bigint): Promise<Array<Teacher>>;
+    listTerms(schoolId: bigint): Promise<Array<Term>>;
     loginSchoolAdmin(username: string, password: string): Promise<bigint | null>;
     loginStudent(admissionNumber: string, password: string): Promise<bigint | null>;
     loginSuperAdmin(email: string, password: string): Promise<boolean>;
@@ -840,6 +846,90 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.searchTeachersByName(arg0, arg1);
+            return result;
+        }
+    }
+    async listClasses(arg0: bigint): Promise<Array<Class>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listClasses(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listClasses(arg0);
+            return result;
+        }
+    }
+    async listSessions(arg0: bigint): Promise<Array<Session>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listSessions(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listSessions(arg0);
+            return result;
+        }
+    }
+    async listStudents(arg0: bigint): Promise<Array<Student>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listStudents(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listStudents(arg0);
+            return result;
+        }
+    }
+    async listSubjects(arg0: bigint): Promise<Array<Subject>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listSubjects(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listSubjects(arg0);
+            return result;
+        }
+    }
+    async listTeachers(arg0: bigint): Promise<Array<Teacher>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listTeachers(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listTeachers(arg0);
+            return result;
+        }
+    }
+    async listTerms(arg0: bigint): Promise<Array<Term>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listTerms(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listTerms(arg0);
             return result;
         }
     }

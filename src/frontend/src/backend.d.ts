@@ -136,6 +136,12 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     listAllSchools(): Promise<Array<School>>;
+    listClasses(schoolId: bigint): Promise<Array<Class>>;
+    listSessions(schoolId: bigint): Promise<Array<Session>>;
+    listStudents(schoolId: bigint): Promise<Array<Student>>;
+    listSubjects(schoolId: bigint): Promise<Array<Subject>>;
+    listTeachers(schoolId: bigint): Promise<Array<Teacher>>;
+    listTerms(schoolId: bigint): Promise<Array<Term>>;
     loginSchoolAdmin(username: string, password: string): Promise<bigint | null>;
     loginStudent(admissionNumber: string, password: string): Promise<bigint | null>;
     loginSuperAdmin(email: string, password: string): Promise<boolean>;

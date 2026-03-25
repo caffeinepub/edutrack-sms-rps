@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -8,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { GraduationCap, Loader2 } from "lucide-react";
+import { Download, GraduationCap, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { useAuth } from "../../context/AuthContext";
@@ -47,6 +48,7 @@ export default function StudentDashboard() {
   const { data: scores = [], isLoading } = useStudentScores(userId);
   const { data: subjects = [] } = useSearchSubjects(schoolId ?? "");
   const [branding, setBranding] = useState<SchoolBrandingLocal | null>(null);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   useEffect(() => {
     if (!actor || !schoolId) return;
@@ -65,6 +67,177 @@ export default function StudentDashboard() {
   const avgScore = scores.length
     ? (totalScore / scores.length).toFixed(1)
     : "0.0";
+
+  const handleDownloadPdf = async () => {
+    if (scores.length === 0) return;
+    setGeneratingPdf(true);
+    try {
+      const { default: jsPDF } = await import("jspdf");
+      const { default: autoTable } = await import("jspdf-autotable");
+
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+      const pageW = doc.internal.pageSize.getWidth();
+      let y = 15;
+
+      // Header: Logo
+      if (branding?.logoBase64) {
+        try {
+          doc.addImage(
+            `data:image/png;base64,${branding.logoBase64}`,
+            "PNG",
+            pageW / 2 - 12,
+            y,
+            24,
+            24,
+          );
+          y += 28;
+        } catch {
+          y += 4;
+        }
+      }
+
+      // School name
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(displayName ?? "School Report Card", pageW / 2, y, {
+        align: "center",
+      });
+      y += 6;
+
+      if (branding?.motto) {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "italic");
+        doc.text(`"${branding.motto}"`, pageW / 2, y, { align: "center" });
+        y += 5;
+      }
+
+      if (branding?.websiteUrl) {
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.text(branding.websiteUrl, pageW / 2, y, { align: "center" });
+        y += 5;
+      }
+
+      // Divider
+      doc.setDrawColor(180, 180, 180);
+      doc.line(14, y, pageW - 14, y);
+      y += 6;
+
+      // Student info
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Student: ${displayName ?? ""}`, 14, y);
+      y += 6;
+
+      // Results table
+      const tableRows = scores.map((score) => {
+        const total = Number(score.total);
+        const grade = score.grade || calcGrade(total);
+        const subjectName =
+          subjectMap.get(score.subjectId.toString()) ?? "Subject";
+        return [
+          subjectName,
+          String(Number(score.ca1)),
+          String(Number(score.ca2)),
+          String(Number(score.exam)),
+          String(total),
+          grade,
+        ];
+      });
+
+      autoTable(doc, {
+        startY: y,
+        head: [
+          ["Subject", "CA1 (/20)", "CA2 (/20)", "Exam (/60)", "Total", "Grade"],
+        ],
+        body: tableRows,
+        foot: [
+          ["Summary", "", "", `Avg: ${avgScore}`, `Total: ${totalScore}`, ""],
+        ],
+        headStyles: { fillColor: [37, 99, 235], textColor: 255, fontSize: 9 },
+        footStyles: {
+          fillColor: [240, 240, 240],
+          textColor: 60,
+          fontStyle: "bold",
+          fontSize: 9,
+        },
+        bodyStyles: { fontSize: 9 },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        margin: { left: 14, right: 14 },
+      });
+
+      // After table
+      const finalY: number = (doc as any).lastAutoTable?.finalY ?? 200;
+      let stampY = finalY + 12;
+
+      // Stamp and Signature footer
+      if (branding?.stampBase64 || branding?.signatureBase64) {
+        doc.setDrawColor(180, 180, 180);
+        doc.line(14, stampY - 4, pageW - 14, stampY - 4);
+
+        if (branding?.stampBase64) {
+          try {
+            doc.addImage(
+              `data:image/png;base64,${branding.stampBase64}`,
+              "PNG",
+              20,
+              stampY,
+              30,
+              30,
+            );
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "normal");
+            doc.text("School Stamp", 35, stampY + 34, { align: "center" });
+          } catch {
+            /* ignore */
+          }
+        }
+
+        if (branding?.signatureBase64) {
+          try {
+            doc.addImage(
+              `data:image/png;base64,${branding.signatureBase64}`,
+              "PNG",
+              pageW - 55,
+              stampY,
+              30,
+              30,
+            );
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "normal");
+            doc.text("Principal's Signature", pageW - 40, stampY + 34, {
+              align: "center",
+            });
+          } catch {
+            /* ignore */
+          }
+        }
+
+        stampY += 40;
+      }
+
+      // Grading scale
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text("Grading Scale:", 14, stampY + 6);
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        "A=70-100  B=60-69  C=50-59  D=45-49  E=40-44  F=0-39",
+        42,
+        stampY + 6,
+      );
+
+      doc.save(`${displayName ?? "student"}-report-card.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed", err);
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
 
   return (
     <Layout title={`My Results — ${displayName ?? "Student"}`}>
@@ -144,13 +317,32 @@ export default function StudentDashboard() {
 
         <Card className="shadow-card">
           <CardHeader className="pb-3">
-            <CardTitle className="text-[15px] flex items-center gap-2">
-              <GraduationCap
-                size={16}
-                style={{ color: "oklch(0.54 0.20 264)" }}
-              />{" "}
-              Result Sheet
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-[15px] flex items-center gap-2">
+                <GraduationCap
+                  size={16}
+                  style={{ color: "oklch(0.54 0.20 264)" }}
+                />{" "}
+                Result Sheet
+              </CardTitle>
+              {scores.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5 text-[12px] h-8"
+                  onClick={handleDownloadPdf}
+                  disabled={generatingPdf}
+                  data-ocid="student_results.download_button"
+                >
+                  {generatingPdf ? (
+                    <Loader2 size={13} className="animate-spin" />
+                  ) : (
+                    <Download size={13} />
+                  )}
+                  {generatingPdf ? "Generating..." : "Download PDF"}
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
