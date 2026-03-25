@@ -27,7 +27,7 @@ export default function AdminLogin() {
     try {
       const schoolId = await actor.loginSchoolAdmin(username, password);
       if (schoolId !== null) {
-        const school = await actor.getSchool(schoolId);
+        const school = await actor.getSchoolSelf();
         login({
           role: "schoolAdmin",
           userId: schoolId.toString(),

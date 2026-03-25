@@ -12,13 +12,25 @@ import {
   Clock,
   GraduationCap,
   LayoutDashboard,
+  Link2,
   LogOut,
+  Palette,
   School,
   Settings,
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useActor } from "../hooks/useActor";
+
+interface SchoolBrandingLocal {
+  motto: string;
+  websiteUrl: string;
+  logoBase64: string;
+  stampBase64: string;
+  signatureBase64: string;
+}
 
 interface NavItem {
   label: string;
@@ -51,11 +63,21 @@ function getNavItems(role: string): NavItem[] {
         icon: <ClipboardList size={16} />,
       },
       {
+        label: "Assignments",
+        to: "/admin/assignments",
+        icon: <Link2 size={16} />,
+      },
+      {
         label: "Sessions",
         to: "/admin/sessions",
         icon: <CalendarDays size={16} />,
       },
       { label: "Terms", to: "/admin/terms", icon: <Clock size={16} /> },
+      {
+        label: "Branding",
+        to: "/admin/branding",
+        icon: <Palette size={16} />,
+      },
     ];
   if (role === "teacher")
     return [
@@ -96,7 +118,8 @@ export default function Layout({
   children: ReactNode;
   title: string;
 }) {
-  const { role, displayName, logout } = useAuth();
+  const { role, displayName, logout, schoolId } = useAuth();
+  const { actor } = useActor();
   const router = useRouter();
   const navItems = getNavItems(role ?? "");
   const pathname = router.state.location.pathname;
@@ -108,6 +131,22 @@ export default function Layout({
         .toUpperCase()
         .slice(0, 2)
     : "U";
+
+  const [branding, setBranding] = useState<SchoolBrandingLocal | null>(null);
+
+  const showBranding =
+    role === "schoolAdmin" || role === "teacher" || role === "student";
+
+  useEffect(() => {
+    if (!actor || !schoolId || !showBranding) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (actor as any)
+      .getSchoolBranding(BigInt(schoolId))
+      .then((result: any) => {
+        if (result) setBranding(result);
+      })
+      .catch(() => {});
+  }, [actor, schoolId, showBranding]);
 
   const handleLogout = () => {
     logout();
@@ -126,16 +165,38 @@ export default function Layout({
       >
         {/* Brand */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
-          <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center">
-            <GraduationCap size={20} className="text-white" />
+          <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center overflow-hidden flex-shrink-0">
+            {showBranding && branding?.logoBase64 ? (
+              <img
+                src={`data:image/*;base64,${branding.logoBase64}`}
+                alt="School Logo"
+                className="w-9 h-9 object-contain"
+              />
+            ) : (
+              <GraduationCap size={20} className="text-white" />
+            )}
           </div>
-          <div>
-            <span className="text-white font-bold text-base leading-tight">
-              EduTrack
+          <div className="min-w-0">
+            <span className="text-white font-bold text-base leading-tight block truncate">
+              {showBranding && displayName ? displayName : "EduTrack"}
             </span>
-            <p className="text-white/60 text-[10px] font-medium uppercase tracking-wider">
-              SMS + RPS
-            </p>
+            {showBranding && branding?.motto ? (
+              <p
+                className="text-white/60 text-[10px] italic leading-tight mt-0.5"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {branding.motto}
+              </p>
+            ) : (
+              <p className="text-white/60 text-[10px] font-medium uppercase tracking-wider">
+                SMS + RPS
+              </p>
+            )}
           </div>
         </div>
 

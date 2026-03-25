@@ -131,6 +131,14 @@ export interface School {
     address: string;
     phone: string;
 }
+export interface SchoolBranding {
+    schoolId: bigint;
+    motto: string;
+    websiteUrl: string;
+    logoBase64: string;
+    stampBase64: string;
+    signatureBase64: string;
+}
 export interface Teacher {
     id: bigint;
     username: string;
@@ -219,10 +227,13 @@ export interface backendInterface {
     deleteTeacher(teacherId: bigint): Promise<void>;
     getStudentSelf(): Promise<Student | null>;
     getTeacherSelf(): Promise<Teacher | null>;
+    getSchoolSelf(): Promise<School | null>;
     updateClass(classId: bigint, classLevel: string, className: string, arm: string): Promise<void>;
     updateStudent(studentId: bigint, fullName: string, gender: string, classId: bigint, admissionNumber: string, parentName: string, parentPhone: string): Promise<void>;
     updateSubject(subjectId: bigint, name: string, code: string, assignedClasses: Array<bigint>, teacherId: bigint | null): Promise<void>;
     updateTeacher(teacherId: bigint, fullName: string, username: string, phone: string, email: string, address: string): Promise<void>;
+    getSchoolBranding(schoolId: bigint): Promise<SchoolBranding | null>;
+    updateSchoolBranding(schoolId: bigint, motto: string, websiteUrl: string, logoBase64: string, stampBase64: string, signatureBase64: string): Promise<void>;
 }
 import type { Class as _Class, School as _School, Score as _Score, Session as _Session, Student as _Student, Subject as _Subject, Teacher as _Teacher, Term as _Term, UserProfile as _UserProfile, UserRole as _UserRole, UserType as _UserType } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -589,6 +600,17 @@ export class Backend implements backendInterface {
             return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getSchoolSelf(): Promise<School | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getSchoolSelf();
+                return from_candid_opt_n13(this._uploadFile, this._downloadFile, result);
+            } catch (e) { this.processError(e); throw new Error("unreachable"); }
+        } else {
+            const result = await this.actor.getSchoolSelf();
+            return from_candid_opt_n13(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async updateClass(arg0: bigint, arg1: string, arg2: string, arg3: string): Promise<void> {
         if (this.processError) {
             try { return await this.actor.updateClass(arg0, arg1, arg2, arg3); }
@@ -612,6 +634,18 @@ export class Backend implements backendInterface {
             try { return await this.actor.updateTeacher(arg0, arg1, arg2, arg3, arg4, arg5); }
             catch (e) { this.processError(e); throw new Error("unreachable"); }
         } else { return await this.actor.updateTeacher(arg0, arg1, arg2, arg3, arg4, arg5); }
+    }
+    async getSchoolBranding(arg0: bigint): Promise<SchoolBranding | null> {
+        if (this.processError) {
+            try { const r = await this.actor.getSchoolBranding(arg0); return r.length === 0 ? null : r[0]; }
+            catch (e) { this.processError(e); throw new Error("unreachable"); }
+        } else { const r = await this.actor.getSchoolBranding(arg0); return r.length === 0 ? null : r[0]; }
+    }
+    async updateSchoolBranding(arg0: bigint, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string): Promise<void> {
+        if (this.processError) {
+            try { return await this.actor.updateSchoolBranding(arg0, arg1, arg2, arg3, arg4, arg5); }
+            catch (e) { this.processError(e); throw new Error("unreachable"); }
+        } else { return await this.actor.updateSchoolBranding(arg0, arg1, arg2, arg3, arg4, arg5); }
     }
     async getTerm(arg0: bigint): Promise<Term | null> {
         if (this.processError) {

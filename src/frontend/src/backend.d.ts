@@ -49,6 +49,14 @@ export interface School {
     address: string;
     phone: string;
 }
+export interface SchoolBranding {
+    schoolId: bigint;
+    motto: string;
+    websiteUrl: string;
+    logoBase64: string;
+    stampBase64: string;
+    signatureBase64: string;
+}
 export interface Teacher {
     id: bigint;
     username: string;
@@ -114,6 +122,8 @@ export interface backendInterface {
     getCallerUserRole(): Promise<UserRole>;
     getClass(id: bigint): Promise<Class | null>;
     getSchool(id: bigint): Promise<School | null>;
+    getSchoolBranding(schoolId: bigint): Promise<SchoolBranding | null>;
+    getSchoolSelf(): Promise<School | null>;
     getScore(id: bigint): Promise<Score | null>;
     getSession(id: bigint): Promise<Session | null>;
     getStudent(id: bigint): Promise<Student | null>;
@@ -137,6 +147,7 @@ export interface backendInterface {
     searchSubjectsByName(schoolId: bigint, name: string): Promise<Array<Subject>>;
     searchTeachersByName(schoolId: bigint, name: string): Promise<Array<Teacher>>;
     updateClass(classId: bigint, classLevel: string, className: string, arm: string): Promise<void>;
+    updateSchoolBranding(schoolId: bigint, motto: string, websiteUrl: string, logoBase64: string, stampBase64: string, signatureBase64: string): Promise<void>;
     updateStudent(studentId: bigint, fullName: string, gender: string, classId: bigint, admissionNumber: string, parentName: string, parentPhone: string): Promise<void>;
     updateSubject(subjectId: bigint, name: string, code: string, assignedClasses: Array<bigint>, teacherId: bigint | null): Promise<void>;
     updateTeacher(teacherId: bigint, fullName: string, username: string, phone: string, email: string, address: string): Promise<void>;

@@ -9,6 +9,8 @@ import {
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Landing from "./pages/Landing";
 import RegisterSchool from "./pages/RegisterSchool";
+import Assignments from "./pages/admin/Assignments";
+import Branding from "./pages/admin/Branding";
 import Classes from "./pages/admin/Classes";
 import AdminDashboard from "./pages/admin/Dashboard";
 import Sessions from "./pages/admin/Sessions";
@@ -156,6 +158,28 @@ const adminTermsRoute = createRoute({
   },
 });
 
+const adminAssignmentsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/assignments",
+  component: Assignments,
+  beforeLoad: () => {
+    const auth = getAuth();
+    if (!auth?.role || auth.role !== "schoolAdmin")
+      throw redirect({ to: "/login/admin" });
+  },
+});
+
+const adminBrandingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/branding",
+  component: Branding,
+  beforeLoad: () => {
+    const auth = getAuth();
+    if (!auth?.role || auth.role !== "schoolAdmin")
+      throw redirect({ to: "/login/admin" });
+  },
+});
+
 const teacherDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/teacher/dashboard",
@@ -204,6 +228,8 @@ const routeTree = rootRoute.addChildren([
   adminSubjectsRoute,
   adminSessionsRoute,
   adminTermsRoute,
+  adminAssignmentsRoute,
+  adminBrandingRoute,
   teacherDashboardRoute,
   teacherScoresRoute,
   studentDashboardRoute,

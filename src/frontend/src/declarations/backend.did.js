@@ -41,6 +41,14 @@ export const School = IDL.Record({
   'address' : IDL.Text,
   'phone' : IDL.Text,
 });
+export const SchoolBranding = IDL.Record({
+  'schoolId' : IDL.Nat,
+  'motto' : IDL.Text,
+  'websiteUrl' : IDL.Text,
+  'logoBase64' : IDL.Text,
+  'stampBase64' : IDL.Text,
+  'signatureBase64' : IDL.Text,
+});
 export const Score = IDL.Record({
   'id' : IDL.Nat,
   'ca1' : IDL.Nat,
@@ -129,6 +137,10 @@ export const idlService = IDL.Service({
   'addTerm' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
   'approveSchool' : IDL.Func([IDL.Nat], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'deleteClass' : IDL.Func([IDL.Nat], [], []),
+  'deleteStudent' : IDL.Func([IDL.Nat], [], []),
+  'deleteSubject' : IDL.Func([IDL.Nat], [], []),
+  'deleteTeacher' : IDL.Func([IDL.Nat], [], []),
   'enterScore' : IDL.Func(
       [IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
       [IDL.Nat],
@@ -138,12 +150,16 @@ export const idlService = IDL.Service({
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getClass' : IDL.Func([IDL.Nat], [IDL.Opt(Class)], ['query']),
   'getSchool' : IDL.Func([IDL.Nat], [IDL.Opt(School)], ['query']),
+  'getSchoolBranding' : IDL.Func([IDL.Nat], [IDL.Opt(SchoolBranding)], ['query']),
+  'getSchoolSelf' : IDL.Func([], [IDL.Opt(School)], []),
   'getScore' : IDL.Func([IDL.Nat], [IDL.Opt(Score)], ['query']),
   'getSession' : IDL.Func([IDL.Nat], [IDL.Opt(Session)], ['query']),
   'getStudent' : IDL.Func([IDL.Nat], [IDL.Opt(Student)], ['query']),
   'getStudentScores' : IDL.Func([IDL.Nat], [IDL.Vec(Score)], ['query']),
+  'getStudentSelf' : IDL.Func([], [IDL.Opt(Student)], []),
   'getSubject' : IDL.Func([IDL.Nat], [IDL.Opt(Subject)], ['query']),
   'getTeacher' : IDL.Func([IDL.Nat], [IDL.Opt(Teacher)], ['query']),
+  'getTeacherSelf' : IDL.Func([], [IDL.Opt(Teacher)], []),
   'getTerm' : IDL.Func([IDL.Nat], [IDL.Opt(Term)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
@@ -182,6 +198,27 @@ export const idlService = IDL.Service({
       [IDL.Vec(Teacher)],
       ['query'],
     ),
+  'updateClass' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text, IDL.Text], [], []),
+  'updateSchoolBranding' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+      [],
+      [],
+    ),
+  'updateStudent' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
+      [],
+      [],
+    ),
+  'updateSubject' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Vec(IDL.Nat), IDL.Opt(IDL.Nat)],
+      [],
+      [],
+    ),
+  'updateTeacher' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+      [],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
@@ -219,6 +256,14 @@ export const idlFactory = ({ IDL }) => {
     'email' : IDL.Text,
     'address' : IDL.Text,
     'phone' : IDL.Text,
+  });
+  const SchoolBranding = IDL.Record({
+    'schoolId' : IDL.Nat,
+    'motto' : IDL.Text,
+    'websiteUrl' : IDL.Text,
+    'logoBase64' : IDL.Text,
+    'stampBase64' : IDL.Text,
+    'signatureBase64' : IDL.Text,
   });
   const Score = IDL.Record({
     'id' : IDL.Nat,
@@ -312,6 +357,10 @@ export const idlFactory = ({ IDL }) => {
     'addTerm' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
     'approveSchool' : IDL.Func([IDL.Nat], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'deleteClass' : IDL.Func([IDL.Nat], [], []),
+    'deleteStudent' : IDL.Func([IDL.Nat], [], []),
+    'deleteSubject' : IDL.Func([IDL.Nat], [], []),
+    'deleteTeacher' : IDL.Func([IDL.Nat], [], []),
     'enterScore' : IDL.Func(
         [
           IDL.Nat,
@@ -330,12 +379,16 @@ export const idlFactory = ({ IDL }) => {
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getClass' : IDL.Func([IDL.Nat], [IDL.Opt(Class)], ['query']),
     'getSchool' : IDL.Func([IDL.Nat], [IDL.Opt(School)], ['query']),
+    'getSchoolBranding' : IDL.Func([IDL.Nat], [IDL.Opt(SchoolBranding)], ['query']),
+  'getSchoolSelf' : IDL.Func([], [IDL.Opt(School)], []),
     'getScore' : IDL.Func([IDL.Nat], [IDL.Opt(Score)], ['query']),
     'getSession' : IDL.Func([IDL.Nat], [IDL.Opt(Session)], ['query']),
     'getStudent' : IDL.Func([IDL.Nat], [IDL.Opt(Student)], ['query']),
     'getStudentScores' : IDL.Func([IDL.Nat], [IDL.Vec(Score)], ['query']),
+    'getStudentSelf' : IDL.Func([], [IDL.Opt(Student)], []),
     'getSubject' : IDL.Func([IDL.Nat], [IDL.Opt(Subject)], ['query']),
     'getTeacher' : IDL.Func([IDL.Nat], [IDL.Opt(Teacher)], ['query']),
+    'getTeacherSelf' : IDL.Func([], [IDL.Opt(Teacher)], []),
     'getTerm' : IDL.Func([IDL.Nat], [IDL.Opt(Term)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
@@ -373,6 +426,27 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat, IDL.Text],
         [IDL.Vec(Teacher)],
         ['query'],
+      ),
+    'updateClass' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text, IDL.Text], [], []),
+    'updateSchoolBranding' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+        [],
+        [],
+      ),
+    'updateStudent' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
+        [],
+        [],
+      ),
+    'updateSubject' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Vec(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [],
+        [],
+      ),
+    'updateTeacher' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+        [],
+        [],
       ),
   });
 };

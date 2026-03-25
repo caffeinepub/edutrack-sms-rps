@@ -27,6 +27,14 @@ export interface School {
   'address' : string,
   'phone' : string,
 }
+export interface SchoolBranding {
+  'schoolId' : bigint,
+  'motto' : string,
+  'websiteUrl' : string,
+  'logoBase64' : string,
+  'stampBase64' : string,
+  'signatureBase64' : string,
+}
 export interface Score {
   'id' : bigint,
   'ca1' : bigint,
@@ -114,6 +122,10 @@ export interface _SERVICE {
   'addTerm' : ActorMethod<[bigint, string], bigint>,
   'approveSchool' : ActorMethod<[bigint], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'deleteClass' : ActorMethod<[bigint], undefined>,
+  'deleteStudent' : ActorMethod<[bigint], undefined>,
+  'deleteSubject' : ActorMethod<[bigint], undefined>,
+  'deleteTeacher' : ActorMethod<[bigint], undefined>,
   'enterScore' : ActorMethod<
     [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
     bigint
@@ -122,12 +134,16 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getClass' : ActorMethod<[bigint], [] | [Class]>,
   'getSchool' : ActorMethod<[bigint], [] | [School]>,
+  'getSchoolBranding' : ActorMethod<[bigint], [] | [SchoolBranding]>,
+  'getSchoolSelf' : ActorMethod<[], [] | [School]>,
   'getScore' : ActorMethod<[bigint], [] | [Score]>,
   'getSession' : ActorMethod<[bigint], [] | [Session]>,
   'getStudent' : ActorMethod<[bigint], [] | [Student]>,
   'getStudentScores' : ActorMethod<[bigint], Array<Score>>,
+  'getStudentSelf' : ActorMethod<[], [] | [Student]>,
   'getSubject' : ActorMethod<[bigint], [] | [Subject]>,
   'getTeacher' : ActorMethod<[bigint], [] | [Teacher]>,
+  'getTeacherSelf' : ActorMethod<[], [] | [Teacher]>,
   'getTerm' : ActorMethod<[bigint], [] | [Term]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
@@ -145,6 +161,11 @@ export interface _SERVICE {
   'searchStudentsByName' : ActorMethod<[bigint, string], Array<Student>>,
   'searchSubjectsByName' : ActorMethod<[bigint, string], Array<Subject>>,
   'searchTeachersByName' : ActorMethod<[bigint, string], Array<Teacher>>,
+  'updateClass' : ActorMethod<[bigint, string, string, string], undefined>,
+  'updateSchoolBranding' : ActorMethod<[bigint, string, string, string, string, string], undefined>,
+  'updateStudent' : ActorMethod<[bigint, string, string, bigint, string, string, string], undefined>,
+  'updateSubject' : ActorMethod<[bigint, string, string, Array<bigint>, [] | [bigint]], undefined>,
+  'updateTeacher' : ActorMethod<[bigint, string, string, string, string, string], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

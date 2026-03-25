@@ -37,6 +37,15 @@ actor {
     isApproved : Bool;
   };
 
+  public type SchoolBranding = {
+    schoolId : Nat;
+    motto : Text;
+    websiteUrl : Text;
+    logoBase64 : Text;
+    stampBase64 : Text;
+    signatureBase64 : Text;
+  };
+
   public type Class = {
     id : Nat;
     schoolId : Nat;
@@ -115,6 +124,7 @@ actor {
   var nextScoreId = 1;
 
   let schools = Map.empty<Nat, School>();
+  let schoolBrandings = Map.empty<Nat, SchoolBranding>();
   let classes = Map.empty<Nat, Class>();
   let subjects = Map.empty<Nat, Subject>();
   let teachers = Map.empty<Nat, Teacher>();
@@ -329,6 +339,27 @@ actor {
         schools.add(schoolId, updatedSchool);
       };
     };
+  };
+
+  // Update school branding (School Admin only)
+  public shared ({ caller }) func updateSchoolBranding(schoolId : Nat, motto : Text, websiteUrl : Text, logoBase64 : Text, stampBase64 : Text, signatureBase64 : Text) : async () {
+    if (not isSchoolAdmin(caller, schoolId)) {
+      Runtime.trap("Unauthorized: Only School Admin can update branding for their school");
+    };
+    let branding : SchoolBranding = {
+      schoolId;
+      motto;
+      websiteUrl;
+      logoBase64;
+      stampBase64;
+      signatureBase64;
+    };
+    schoolBrandings.add(schoolId, branding);
+  };
+
+  // Get school branding (public query - teachers, students and admins can read it)
+  public query func getSchoolBranding(schoolId : Nat) : async ?SchoolBranding {
+    schoolBrandings.get(schoolId);
   };
 
   // Add class (School Admin only, for their school)
@@ -815,6 +846,24 @@ actor {
     };
   };
 
+
+  // Get own school (for use right after login - update call avoids stale query state)
+  public shared ({ caller }) func getSchoolSelf() : async ?School {
+    switch (userProfiles.get(caller)) {
+      case (?profile) {
+        switch (profile.userType) {
+          case (#schoolAdmin) {
+            switch (profile.schoolId) {
+              case (?sid) { schools.get(sid) };
+              case (null) { null };
+            };
+          };
+          case (_) { null };
+        };
+      };
+      case (null) { null };
+    };
+  };
   // Update teacher (School Admin only)
   public shared ({ caller }) func updateTeacher(teacherId : Nat, fullName : Text, username : Text, phone : Text, email : Text, address : Text) : async () {
     switch (teachers.get(teacherId)) {
